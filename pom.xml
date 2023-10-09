@@ -16,7 +16,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>2021.0.7</spring-cloud.version>
-		<sonar.exclusions>**/com/codeddecode/restaurantlisting/dto/** , **/*/com/codeddecode/restaurantlisting/entity/**/*</sonar.exclusions>
+		<sonar.exclusions>**/com/sesame/restaurantlisting/dto/** , **/*/com/sesame/restaurantlisting/entity/**/*</sonar.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
