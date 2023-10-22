@@ -6,7 +6,7 @@ pipeline {
     VERSION = "${env.BUILD_ID}"
 
   }
-
+//it's our external tool 
   tools {
     maven "Maven"
   }
@@ -14,7 +14,8 @@ pipeline {
   stages {
 
     stage('Maven Build'){
-        steps{
+        steps{ //we skipped the test step her coz we want just to check if there's no compilation error 
+          //and just the build is successful or not
         sh 'mvn clean package  -DskipTests'
         }
     }
@@ -24,7 +25,7 @@ pipeline {
         sh 'mvn test'
       }
     }
-
+//execute sonarQube
     stage('SonarQube Analysis') {
   steps {
     sh 'mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar -Dsonar.host.url=http://35.180.137.8:9000/ -Dsonar.login=squ_32789bcdadb6e4337e432d6cbc100c2a1a14fde5'
@@ -37,7 +38,7 @@ pipeline {
                 script {
                     def token = "squ_32789bcdadb6e4337e432d6cbc100c2a1a14fde5"
                     def sonarQubeUrl = "http://35.180.137.8:9000/api"
-                    def componentKey = "com.sesame:restaurantlisting"
+                    def componentKey = "com.sesame:restaurantlisting" //combination of group id and artifactid
                     def coverageThreshold = 80.0
 
                     def response = sh (
@@ -58,7 +59,7 @@ pipeline {
                 }
             }
         } 
-
+//use dockerhub credential to log in dockerhub ,then we are going to build this image..
 
       stage('Docker Build and Push') {
       steps {
@@ -67,7 +68,7 @@ pipeline {
           sh 'docker push jiheneayoub1/restaurant-listing-service:${VERSION}'
       }
     } 
-
+//once our docker image is pushed and we clean the directory
 
      stage('Cleanup Workspace') {
       steps {
@@ -76,7 +77,11 @@ pipeline {
       }
     }
 
-
+//from Jenkins when you updatr the version image and push it, the tag will be 'update image tag'
+    // in the manifest file. yml (deployment-folder/aws/restaurant-manifest.yml), the version of the image will 
+    //change and be same version as jenkins
+    //!Bref, Jenkins does maven build, test, run sonar,code coverage,ckeck docker and build image
+    //and Push this image to docker hub and after that it updates in the deployment folder!
 
     stage('Update Image Tag in GitOps') {
       steps {
@@ -91,7 +96,7 @@ pipeline {
         sshagent(['git-ssh'])
             {
                   sh('git push')
-            }
+            }//!!!THE NEW image after getting pushed ,will be PULLED by ArgoCD and DEPLOYED in our cluster!!
         }
       }
     }
